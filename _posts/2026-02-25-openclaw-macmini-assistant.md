@@ -3,7 +3,7 @@ title: "用 Mac Mini 搭建 OpenClaw 并真正当作私人 AI 助手使用"
 date: 2026-02-25
 categories: [AI, OpenClaw, Mac]
 tags: [AI助手, OpenClaw, MacMini, 自动化, 生产效率]
-image: https://res.cloudinary.com/dxqklbcjw/image/upload/v1772005830/yg09hvml2f1j9ahebw30.png
+image: https://res.cloudinary.com/dxqklbcjw/image/upload/v1772006495/v3f2wndhahbylep68fvd.png
 ---
 
 > 当 AI 助手不再只是聊天工具，而是真正帮你干活、帮你思考、帮你记得一切，那是什么体验？
