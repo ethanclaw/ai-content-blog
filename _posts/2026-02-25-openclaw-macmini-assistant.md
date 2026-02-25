@@ -8,7 +8,7 @@ image: https://res.cloudinary.com/dxqklbcjw/image/upload/v1772006495/v3f2wndhahb
 
 > 当 AI 助手不再只是聊天工具，而是真正帮你干活、帮你思考、帮你记得一切，那是什么体验？
 
-![OpenClaw 架构图](https://res.cloudinary.com/dxqklbcjw/image/upload/v1772005830/yg09hvml2f1j9ahebw30.png)
+![封面图](https://res.cloudinary.com/dxqklbcjw/image/upload/v1772006495/v3f2wndhahbylep68fvd.png)
 
 ---
 
@@ -29,6 +29,8 @@ Mac Mini M4 的神经网络引擎本地推理效率很高，功耗只有 30W 左
 ---
 
 ## 3. 安装配置关键流程
+
+![OpenClaw 架构图](https://res.cloudinary.com/dxqklbcjw/image/upload/v1772005830/yg09hvml2f1j9ahebw30.png)
 
 很多人以为部署一个本地 AI 助手需要复杂的服务器运维知识。其实现在已经是「一行命令」的时代。
 
@@ -58,6 +60,8 @@ openclaw channel add telegram
 
 ### 4.1 消息聚合：一个入口管理所有对话
 
+![消息聚合](https://res.cloudinary.com/dxqklbcjw/image/upload/v1772007370/ijot2qbo2tbioob57uqv.png)
+
 你在 Telegram 问 AI 一个问题，在 Discord 问另一个，在微信又问一个。所有的对话历史分散在各处，AI 无法理解你的完整上下文。
 
 OpenClaw 支持多通道接入，所有平台的对话都可以汇聚到一个 session 里。你可以设定一个「主会话」，让 AI 记住你之前问过什么、你的偏好是什么。在配置文件中设置 `sessionTarget: main`，让所有通道的消息都进入同一个会话。
@@ -82,6 +86,8 @@ OpenClaw 可以通过 Todoist API 管理任务，通过日历 API 读取事件�
 
 ### 4.5 自动化工作流：连接 n8n、Notion、Todoist
 
+![自动化工作流](https://res.cloudinary.com/dxqklbcjw/image/upload/v1772007372/jiyqt4ndujqo7zsj8gqp.png)
+
 你想让 AI 帮你做一些复杂的事情，比如「把今天的会议记录存入 Notion，然后同步到 Todoist 生成待办」。单一 AI 做不了这种跨应用的复杂流程。
 
 OpenClaw 可以调用外部脚本和 API，配合 n8n 这样的工作流工具，可以编排复杂的自动化链路。AI 驱动灵活但不可预测，规则驱动稳定但不够智能。混合使用是最佳策略：规则做主干，AI 做判断。
@@ -95,6 +101,8 @@ OpenClaw 支持 cron 定时任务和 heartbeat 主动检查。你可以设定每
 ---
 
 ## 5. 如何培养它成为「懂你」的助手
+
+![记忆机制](https://res.cloudinary.com/dxqklbcjw/image/upload/v1772007373/ejqzgmeyqhhrhtozyv3i.png)
 
 大多数 AI 助手用完就忘。每次对话都是独立的上下文，你需要重新告诉它你的偏好、你的身份、你的工作方式。
 
