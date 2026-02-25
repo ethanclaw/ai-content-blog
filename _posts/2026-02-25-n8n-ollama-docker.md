@@ -3,16 +3,15 @@ layout: post
 title: "n8n + Ollama 本地 AI 自动化实战：Docker 部署完全指南"
 date: 2026-02-25
 categories: [n8n, Ollama, Docker, AI]
-cover: https://res.cloudinary.com/dxqklbcjw/image/upload/v1772002564/wzsggwx1tixdfqud0bpn.png
 ---
 
-![架构图](https://res.cloudinary.com/dxqklbcjw/image/upload/v1772002564/wzsggwx1tixdfqud0bpn.png)
+![n8n + Ollama 架构图](https://res.cloudinary.com/dxqklbcjw/image/upload/v1772002564/wzsggwx1tixdfqud0bpn.png)
 
 > 当开源自动化平台遇上本地大语言模型，一场关于效率、隐私与成本的革命正在你的服务器上悄然发生。无需 API 密钥，无需网络延迟，今天我们就来搭建完全自主可控的智能自动化系统。
 
 ## 开场故事
 
-凌晨3点15分，我的手机突然震动个不停。睡眼惺忪地解锁屏幕，映眼帘的是云服务商发来的紧急告警：「API 调用费用已超出本月预算300%」。我瞬间清醒——这个月才过去10天！
+凌晨3点15分，我的手机突然震动个不停。睡眼惺忪地解锁屏幕，映入眼帘的是云服务商发来的紧急告警：「API 调用费用已超出本月预算300%」。我瞬间清醒——这个月才过去10天！
 
 更让我脊背发凉的是，就在昨天，我们的客户数据团队报告了一个诡异现象：某些客户的对话记录中，出现了从未有过的「幻觉回答」。经过排查，我们发现第三方AI服务的API在高峰时段偶尔会返回完全无关的内容，而且——最糟糕的是——这些请求日志显示我们的数据被路由到了一个从未见过的服务器IP。
 
@@ -24,18 +23,16 @@ cover: https://res.cloudinary.com/dxqklbcjw/image/upload/v1772002564/wzsggwx1tix
 
 在深入技术细节之前，我们先理性分析一下：为什么要放弃便捷的云服务，选择相对复杂的自托管方案？让我们用数据说话：
 
-| 维度 | 云AI服务（OpenAI/Anthropic等） | 自托管方案（n8n+Ollama） | 差异分析 |
-|------|--------------------------------|--------------------------|----------|
-| **延迟** | 50-500ms（依赖网络质量） | 10-100ms（本地网络） | 本地部署消除了网络往返延迟 |
-| **隐私** | 数据需离开本地网络 | 数据永不离开你的服务器 | 敏感数据完全可控 |
-| **成本** | $0.002-$12/千token | 一次性硬件投资 | 月调用量超100万token后更经济 |
-| **灵活性** | 受限于提供商模型列表 | 任意开源模型随时切换 | 可根据任务选择最合适的模型 |
+| 维度 | 云AI服务 | 自托管方案 | 差异分析 |
+|------|----------|------------|----------|
+| **延迟** | 50-500ms | 10-100ms | 本地部署消除网络往返延迟 |
+| **隐私** | 数据离开本地网络 | 数据永不离开服务器 | 敏感数据完全可控 |
+| **成本** | $0.002-$12/千token | 一次性硬件投入 | 月调用量超100万token后更经济 |
+| **灵活性** | 受限于提供商 | 任意开源模型 | 可根据任务选择最合适模型 |
 
 **关键洞察**：如果你每月在AI API上的花费超过$100，或者处理敏感数据，或者需要低延迟响应，那么自托管方案在6-12个月内就能收回硬件投资成本。
 
 ## 二、技术架构全景
-
-让我们先理解这个技术栈是如何协同工作的：
 
 上图展示了完整的技术架构：
 - **n8n** 作为自动化大脑，负责工作流编排、触发器和数据处理
@@ -47,23 +44,21 @@ cover: https://res.cloudinary.com/dxqklbcjw/image/upload/v1772002564/wzsggwx1tix
 
 ### 3.1 服务器选择
 
-**场景一：个人开发/测试**
-- 推荐配置：32GB RAM + 16GB VRAM（RTX 4060 Ti）
-- 可运行模型：7B参数模型（全精度），13B模型（4-bit量化）
-
-**场景二：小型团队生产环境**
-- 推荐配置：64GB RAM + 24GB VRAM（RTX 4090）
-- 可运行模型：13B模型（全精度），34B模型（4-bit量化）
+| 场景 | 推荐配置 | 可运行模型 |
+|------|----------|------------|
+| 个人开发/测试 | 32GB RAM + 16GB VRAM | 7B（全精度）, 13B（4-bit） |
+| 小型团队 | 64GB RAM + 24GB VRAM | 13B（全精度）, 34B（4-bit） |
+| 企业级 | 128GB+ RAM + 多GPU | 70B+ 模型 |
 
 ### 3.2 Docker & Docker Compose 安装
 
 ```bash
-# Ubuntu 22.04 LTS 安装
+# Ubuntu 22.04 LTS
 curl -fsSL https://get.docker.com -o get-docker.sh
 sudo sh get-docker.sh
 sudo usermod -aG docker $USER
 
-# 安装 Docker Compose
+# Docker Compose
 sudo curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
 sudo chmod +x /usr/local/bin/docker-compose
 ```
@@ -73,10 +68,7 @@ sudo chmod +x /usr/local/bin/docker-compose
 ### 4.1 快速部署
 
 ```bash
-# 拉取镜像
 docker pull ollama/ollama:latest
-
-# 运行容器
 docker run -d \
   --name ollama \
   --restart always \
@@ -84,11 +76,10 @@ docker run -d \
   -p 11434:11434 \
   ollama/ollama:latest
 
-# 进入容器拉取模型
 docker exec -it ollama ollama pull llama3.1:8b
 ```
 
-### 4.2 docker-compose 部署（推荐）
+### 4.2 docker-compose（推荐）
 
 ```yaml
 version: '3.8'
@@ -101,8 +92,6 @@ services:
       - "11434:11434"
     volumes:
       - ollama_data:/root/.ollama
-    environment:
-      - OLLAMA_HOST=0.0.0.0
     deploy:
       resources:
         reservations:
@@ -114,18 +103,15 @@ volumes:
   ollama_data:
 ```
 
-### 4.3 常用模型推荐
+### 4.3 常用模型
 
-| 模型 | 大小 | 显存需求 | 特点 |
-|------|------|----------|------|
+| 模型 | 大小 | 显存 | 特点 |
+|------|------|------|------|
 | Llama 3.1 8B | 4.7GB | 8GB | 平衡性能 |
 | Qwen 2.5 7B | 4.4GB | 8GB | 中文能力强 |
 | Mistral 7B | 4.1GB | 8GB | 推理速度快 |
-| Phi-3-mini | 2.3GB | 4GB | 轻量高效 |
 
 ## 五、Docker 部署 n8n
-
-### 5.1 docker-compose.yml
 
 ```yaml
 version: '3.8'
@@ -139,7 +125,6 @@ services:
     environment:
       - N8N_PROTOCOL=http
       - N8N_HOST=localhost
-      - N8N_PORT=5678
     volumes:
       - n8n_data:/home/node/.n8n
     extra_hosts:
@@ -148,117 +133,95 @@ volumes:
   n8n_data:
 ```
 
-### 5.2 关键配置解析
+**关键配置**：`extra_hosts` 让 n8n 可以访问宿主机上的 Ollama。
 
-**extra_hosts** 是最关键的配置：
-- 让 n8n 容器可以访问宿主机上的 Ollama 服务
-- `host.docker.internal` 在 Docker 中解析到宿主机 IP
-
-启动：
 ```bash
 docker-compose up -d
+# 访问 http://localhost:5678
 ```
 
-访问 `http://localhost:5678` 即可进入 n8n 界面。
+## 六、第一个 AI 工作流
 
-## 六、第一个 AI 工作流实战
+### 工作流设计：日志自动摘要
 
-### 6.1 工作流设计：日志自动摘要系统
+1. 添加 **Ollama 节点**
+2. 配置 Credentials：`http://host.docker.internal:11434`
+3. 添加 **Schedule Trigger**
+4. 添加 **Read File** → **Code** → **Ollama** → **Send Email**
 
-1. **添加 Ollama 节点**：在 n8n 界面搜索 "Ollama"
-2. **配置 Credentials**：
-   - Base URL: `http://host.docker.internal:11434`
-   - Model: `llama3.1:8b`
-3. **添加触发器**：Schedule Trigger（每小时触发）
-4. **添加处理节点**：Read File → Code Node → Ollama → Send Email
-
-### 6.2 示例 Prompt
+### 示例 Prompt
 
 ```
-请分析以下服务器日志，提供：
-1. 错误统计（ERROR级别日志数量）
+请分析以下服务器日志：
+1. 错误统计
 2. 主要问题摘要
 3. 建议的排查步骤
 
 日志内容：{{ $json.logs }}
 ```
 
-## 七、性能优化深度指南
+## 七、性能优化
 
-### 7.1 GPU 加速
+### GPU 加速
 
-确保安装 NVIDIA Container Toolkit：
 ```bash
+# 安装 NVIDIA Container Toolkit
 distribution=$(. /etc/os-release;echo $ID$VERSION_ID)
 curl -s -L https://nvidia.github.io/nvidia-docker/gpgkey | sudo apt-key add -
 curl -s -L https://nvidia.github.io/nvidia-docker/$distribution/nvidia-docker.list | sudo tee /etc/apt/sources.list.d/nvidia-docker.list
 sudo apt-get update && sudo apt-get install -y nvidia-container-toolkit
 ```
 
-### 7.2 模型量化
+### 模型量化
 
 ```bash
-# 4-bit 量化，显存减半
+# 4-bit 量化
 ollama pull llama3.1:8b-q4_0
-
-# 查看可用量化版本
-ollama list
 ```
 
-### 7.3 显存优化建议
+### 显存参考
 
 | 显存 | 可运行模型 |
 |------|-----------|
-| 8GB | 7B 模型（4-bit） |
-| 16GB | 13B 模型（4-bit） |
-| 24GB+ | 70B 模型（4-bit） |
+| 8GB | 7B（4-bit） |
+| 16GB | 13B（4-bit） |
+| 24GB+ | 70B（4-bit） |
 
 ## 八、生产环境最佳实践
 
-### 8.1 安全配置
-
-- 使用强加密密钥：`openssl rand -base64 32`
-- 配置防火墙规则
-- 定期备份数据卷
-
-### 8.2 监控告警
-
+### 安全配置
 ```bash
-# 监控容器状态
-docker stats ollama n8n
+# 生成加密密钥
+openssl rand -base64 32
+```
 
-# 监控 GPU
+### 监控
+```bash
+docker stats ollama n8n
 nvidia-smi -l 1
 ```
 
-## 九、常见问题 Q&A
+## 九、常见问题
 
-**Q1: Ollama 容器无法访问 GPU？**
+**Q1: 无法访问 GPU？**
 确保安装 nvidia-container-toolkit 并重启 Docker。
 
 **Q2: n8n 无法连接 Ollama？**
-检查 extra_hosts 配置，确保使用 `http://host.docker.internal:11434`。
+检查 extra_hosts，使用 `http://host.docker.internal:11434`。
 
-**Q3: 模型加载太慢？**
-使用量化模型，或增加显存。
-
-**Q4: 如何备份数据？**
-使用 docker-compose 的卷备份：
+**Q3: 如何备份？**
 ```bash
-docker run --rm -v ollama_data:/data -v $(pwd):/backup alpine tar czf /backup/ollama_backup.tar.gz /data
+docker run --rm -v ollama_data:/data -v $(pwd):/backup alpine tar czf /backup/backup.tar.gz /data
 ```
 
-**Q5: 可以运行多少个模型？**
-取决于显存大小，建议同时加载 1-2 个模型。
-
-## 十、总结与延伸
+## 十、总结
 
 自托管 AI 不仅是一项技术选择，更是对工具自主权的回归。当你掌控了自己的 AI 基础设施，你就拥有了定义智能化未来的主动权。
 
 **进阶方向**：
 - 集成更多服务（数据库、消息队列）
 - 模型微调（LoRA、QLoRA）
-- 集群部署（高可用）
+- 集群部署
 
 ---
 
