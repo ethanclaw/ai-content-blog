@@ -9,7 +9,7 @@ categories:
 
 # 后端自动化：2026 年 AI 投资的下一个前沿
 
-![封面图](https://res.cloudinary.com/dxqklbcjw/image/upload/v1772035066/si6808s3bygdokyec5pb.png)
+![封面图](https://res.cloudinary.com/dxqklbcjw/image/upload/v1772035670/rt98cyvqeyj8vtzifhsz.jpg)
 
 ## 一、现象与趋势
 
