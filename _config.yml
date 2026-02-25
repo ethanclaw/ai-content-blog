@@ -1,0 +1,8 @@
+title: Ethan's Blog
+description: AI & Automation 深度内容
+url: https://ethanclaw.github.io
+github_username: ethanclaw
+
+theme: minima
+plugins:
+  - jekyll-seo-tag
